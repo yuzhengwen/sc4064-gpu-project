@@ -1,6 +1,18 @@
 *.i
 *.ii
 *.gpu
+*.fatbin
+
+# PBS/qsub output files
+*.o[0-9]*
+*.e[0-9]*
+
+# Compiled binaries
+helloworld
+main
+*.out
+*.exe
+
+# CUDA compiled files
 *.ptx
 *.cubin
-*.fatbin
