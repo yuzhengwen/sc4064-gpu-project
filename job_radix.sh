@@ -7,24 +7,31 @@
 #PBS -o RADIX_results.log
 #PBS -j oe
 
-# Change to the directory where you submitted the job
+# 1. Start in the Root folder
 cd "$PBS_O_WORKDIR" || exit $?
-
-cd radix || exit $?
 
 echo "--- Loading Environment Modules ---"
 module purge
-
-# Load the GCC module
 module load gcc/11.2.0
-
-# Load the CUDA module
 module load cuda/12.2.2
 
 echo "--- Compiling Project ---"
+# 2. Go into radix and build
+cd radix
 make clean
 make
 
-echo "--- Running Evaluation ---"
-# Run the executable from inside the newly created output folder
-./output/radix_sort_eval
+# 3. Move the entire output folder from 'radix/output' to the 'Root'
+# If a root output folder already exists, we remove it first to avoid errors
+rm -rf ../output
+mv output ../
+
+# 4. Step back out to the Root folder
+cd ..
+
+echo "--- Running Evaluation from Root ---"
+# 5. Run the executable now located in the Root's output folder
+# This ensures phase1_results.csv is created in the Root
+./output/radix_sort_eval 
+
+echo "--- Evaluation Finished ---"

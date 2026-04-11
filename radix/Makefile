@@ -8,7 +8,12 @@ OUT_DIR = output
 TARGET = $(OUT_DIR)/radix_sort_eval
 
 # Object files (now explicitly mapped to the output folder)
-OBJS = $(OUT_DIR)/main.o $(OUT_DIR)/radix_cpu_seq.o $(OUT_DIR)/radix_gpu_seq.o $(OUT_DIR)/radix_gpu_par.o $(OUT_DIR)/radix_gpu_lib.o
+OBJS = $(OUT_DIR)/main.o \
+       $(OUT_DIR)/radix_cpu_seq.o \
+       $(OUT_DIR)/radix_gpu_seq.o \
+       $(OUT_DIR)/radix_gpu_par.o \
+       $(OUT_DIR)/radix_gpu_lib.o \
+       $(OUT_DIR)/radix_gpu_opt.o
 
 all: build_dir $(TARGET)
 
@@ -33,6 +38,9 @@ $(OUT_DIR)/radix_gpu_par.o: radix_gpu_par.cu utils.h
 
 $(OUT_DIR)/radix_gpu_lib.o: radix_gpu_lib.cu utils.h
 	$(NVCC) $(NVCC_FLAGS) -c radix_gpu_lib.cu -o $@
+
+$(OUT_DIR)/radix_gpu_opt.o: radix_gpu_opt.cu utils.h
+	$(NVCC) $(NVCC_FLAGS) -c radix_gpu_opt.cu -o $@
 
 # Clean now just deletes the entire output directory
 clean:
