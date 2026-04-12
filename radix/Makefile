@@ -4,16 +4,18 @@ NVCC_FLAGS = -O3 -std=c++14
 # Define the output directory
 OUT_DIR = output
 
-# Target executable name (now inside the output folder)
+# Target executable name
 TARGET = $(OUT_DIR)/radix_sort_eval
 
-# Object files (now explicitly mapped to the output folder)
+# Object files
 OBJS = $(OUT_DIR)/main.o \
+       $(OUT_DIR)/scan.o \
        $(OUT_DIR)/radix_cpu_seq.o \
        $(OUT_DIR)/radix_gpu_seq.o \
        $(OUT_DIR)/radix_gpu_par.o \
        $(OUT_DIR)/radix_gpu_lib.o \
-       $(OUT_DIR)/radix_gpu_opt.o
+       $(OUT_DIR)/radix_gpu_opt_p2.o \
+       $(OUT_DIR)/radix_gpu_opt_p3.o
 
 all: build_dir $(TARGET)
 
@@ -39,9 +41,14 @@ $(OUT_DIR)/radix_gpu_par.o: radix_gpu_par.cu utils.h
 $(OUT_DIR)/radix_gpu_lib.o: radix_gpu_lib.cu utils.h
 	$(NVCC) $(NVCC_FLAGS) -c radix_gpu_lib.cu -o $@
 
-$(OUT_DIR)/radix_gpu_opt.o: radix_gpu_opt.cu utils.h
-	$(NVCC) $(NVCC_FLAGS) -c radix_gpu_opt.cu -o $@
+$(OUT_DIR)/radix_gpu_opt_p2.o: radix_gpu_opt_p2.cu utils.h
+	$(NVCC) $(NVCC_FLAGS) -c radix_gpu_opt_p2.cu -o $@
 
-# Clean now just deletes the entire output directory
+$(OUT_DIR)/radix_gpu_opt_p3.o: radix_gpu_opt_p3.cu utils.h
+	$(NVCC) $(NVCC_FLAGS) -c radix_gpu_opt_p3.cu -o $@
+
+$(OUT_DIR)/scan.o: scan.cu utils.h
+	$(NVCC) $(NVCC_FLAGS) -c scan.cu -o $@
+
 clean:
 	rm -rf $(OUT_DIR)

@@ -36,12 +36,14 @@ static inline int find_max_host_wrapper(int* d_arr, int n) {
 // 3. The Prototypes (Keep these INSIDE the header guard)
 void print_sample(const char* label, int* arr, int n, int count = 20, bool is_device = true);
 void verify_and_print(int* d_arr, int n);
+void manual_exclusive_scan(int* d_arr, int n);
 
 // Sorting implementations
 void cpu_sequential_radix_sort(int* h_arr, int n);
 void gpu_sequential_radix_sort(int* d_arr, int n);
 void gpu_parallel_radix_sort(int* d_arr, int n);
-void gpu_parallel_radix_sort_opt(int* d_arr, int n);
+void gpu_parallel_radix_sort_opt_p2(int* d_arr, int n);
+void gpu_parallel_radix_sort_opt_p3(int* d_arr, int n);
 void gpu_library_radix_sort(int* d_arr, int n);
 
 #endif
