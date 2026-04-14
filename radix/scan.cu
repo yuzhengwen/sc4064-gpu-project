@@ -4,10 +4,11 @@ __global__ void block_inclusive_scan_kernel(int* data, int* block_sums, int n) {
     extern __shared__ int temp[];
     int id = threadIdx.x + blockIdx.x * blockDim.x;
 
+    // Load one value per thread into shared memory, padding with zero past n.
     temp[threadIdx.x] = (id < n) ? data[id] : 0;
     __syncthreads();
 
-    // Hillis-Steele inclusive scan
+    // Hillis-Steele inclusive scan inside a block: repeatedly add from farther left.
     for (int offset = 1; offset < blockDim.x; offset *= 2) {
         int val = 0;
         if (threadIdx.x >= offset) val = temp[threadIdx.x - offset];
@@ -18,6 +19,7 @@ __global__ void block_inclusive_scan_kernel(int* data, int* block_sums, int n) {
 
     if (id < n) data[id] = temp[threadIdx.x];
 
+    // The last thread stores the block total so higher-level passes can offset it.
     if (threadIdx.x == blockDim.x - 1 && block_sums != nullptr) {
         block_sums[blockIdx.x] = temp[threadIdx.x];
     }
@@ -39,9 +41,12 @@ void manual_inclusive_scan(int* d_arr, int n) {
     int blocksPerGrid = (n + threadsPerBlock - 1) / threadsPerBlock;
     int sharedMemSize = threadsPerBlock * sizeof(int);
 
+    // One block is the simple case: scan directly in shared memory.
     if (blocksPerGrid <= 1) {
         block_inclusive_scan_kernel<<<1, threadsPerBlock, sharedMemSize>>>(d_arr, nullptr, n);
     } else {
+        // Multi-block inclusive scan: scan each block, recursively scan block sums,
+        // then add the previous block totals back into every block.
         int* d_block_sums;
         CUDA_CHECK(cudaMalloc(&d_block_sums, blocksPerGrid * sizeof(int)));
         block_inclusive_scan_kernel<<<blocksPerGrid, threadsPerBlock, sharedMemSize>>>(d_arr, d_block_sums, n);
@@ -53,6 +58,7 @@ void manual_inclusive_scan(int* d_arr, int n) {
 
 void manual_exclusive_scan(int* d_arr, int n) {
     if (n <= 0) return;
+    // Convert inclusive scan output into an exclusive scan in a separate buffer.
     manual_inclusive_scan(d_arr, n);
 
     int* d_temp_exclusive;

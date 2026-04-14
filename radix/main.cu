@@ -7,7 +7,7 @@
 #include <fstream> // For file output
 #include "utils.h"
 
-// Structure to hold data for the final summary table
+// Stores the averaged runtime for each implementation at one input size.
 struct Result {
     long long size;
     float cpu_ms;
@@ -17,6 +17,8 @@ struct Result {
 };
 
 // --- CUDA KERNELS FOR DATA GENERATION & VERIFICATION ---
+// These helper kernels are not part of radix sort itself; they support
+// benchmarking by generating input and checking whether the output is sorted.
 __global__ void setup_kernel(curandState *state, unsigned long seed) {
     int id = threadIdx.x + blockIdx.x * blockDim.x;
     curand_init(seed, id, 0, &state[id]);
@@ -70,7 +72,8 @@ int verify_sorting(int* d_arr, int n, const char* algo_name, int size_pow) {
     return h_is_sorted;
 }
 
-// Thorough Burn-in for all GPU implementations
+// Run every GPU variant a few times before timing so the benchmark does not
+// include cold-start effects such as context creation or first-use overhead.
 void thorough_gpu_warmup(int n_warmup = 100000, int iterations = 10) {
     printf("Performing thorough GPU burn-in (%d elements, %d iterations)...\n", n_warmup, iterations);
     int* d_warmup;
@@ -103,10 +106,10 @@ int main() {
     force_context_init<<<1, 1024>>>();
     cudaDeviceSynchronize();
 
-    // 1. Hardware Burn-in
+    // 1. Hardware burn-in.
     thorough_gpu_warmup();
 
-    // 2. Open CSV with updated headers for comparison
+    // 2. Open CSV with updated headers for comparison.
     std::ofstream csvFile("phase4_results.csv");
     if (csvFile.is_open()) {
         csvFile << "Size,CPU_ms,GPU_Seq_ms,GPU_Naive_ms,GPU_P2_Opt_ms,GPU_P3_Opt_ms,GPU_Thrust_ms\n";
@@ -198,7 +201,7 @@ int main() {
             delete[] h_original; delete[] h_test;
         }
 
-        // Calculate Averages
+        // Average across trials so the output is less noisy.
         float a_cpu = t_cpu / NUM_TRIALS;
         float a_seq = t_seq / NUM_TRIALS;
         float a_naive = t_naive / NUM_TRIALS;
@@ -206,7 +209,7 @@ int main() {
         float a_p3 = t_p3 / NUM_TRIALS;
         float a_lib = t_lib / NUM_TRIALS;
 
-        // Logging
+        // Keep a compact console summary for the two optimized GPU versions.
         printf("     - P2 Opt: %8.3f ms | P3 Opt: %8.3f ms\n\n", a_p2, a_p3);
 
         if (csvFile.is_open()) {

@@ -4,9 +4,9 @@
 #include <thrust/execution_policy.h>
 
 void gpu_library_radix_sort(int* d_arr, int n) {
-    // Wrap the raw device pointer so Thrust knows it lives on the GPU
+    // Wrap the raw device pointer so Thrust can treat it as a device range.
     thrust::device_ptr<int> dev_ptr(d_arr);
     
-    // Execute the sort entirely on the device
+    // Thrust performs the radix sort internally and keeps the work on the GPU.
     thrust::sort(thrust::device, dev_ptr, dev_ptr + n);
 }

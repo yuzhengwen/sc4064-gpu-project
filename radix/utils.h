@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cuda_runtime.h>
 
-// 1. The Macro
+// Centralized CUDA error checking so every allocation and copy fails loudly.
 #define CUDA_CHECK(call) do { \
     cudaError_t err = call; \
     if (err != cudaSuccess) { \
@@ -15,7 +15,7 @@
     } \
 } while (0)
 
-// 2. The Logic (Static Inline so every file gets its own copy)
+// Small host-side helpers used by multiple implementations.
 static inline int find_max_host(int* h_arr, int n) {
     if (n <= 0) return 0;
     int max_val = h_arr[0];
@@ -33,7 +33,7 @@ static inline int find_max_host_wrapper(int* d_arr, int n) {
     return res;
 }
 
-// 3. The Prototypes (Keep these INSIDE the header guard)
+// Shared helpers for printing, verification, scans, and the four sort variants.
 void print_sample(const char* label, int* arr, int n, int count = 20, bool is_device = true);
 void verify_and_print(int* d_arr, int n);
 void manual_exclusive_scan(int* d_arr, int n);

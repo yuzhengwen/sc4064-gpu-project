@@ -1,7 +1,7 @@
 #include "utils.h"
 
-// Kernel 1: Evaluate Predicate
-// Maps elements to 1 if they belong in the current digit bucket, or 0 if they do not.
+// Kernel 1: Build a predicate mask for one bucket in one digit pass.
+// `predicate[id] == 1` means this value belongs to the active bucket.
 __global__ void evaluate_predicate_kernel(int* src, int* predicate, int n, int exp, int digit) {
     int id = threadIdx.x + blockIdx.x * blockDim.x;
     if (id < n) {
@@ -9,13 +9,14 @@ __global__ void evaluate_predicate_kernel(int* src, int* predicate, int n, int e
     }
 }
 
-// Kernel 2: Scatter Elements
+// Kernel 2: Scatter values into their final range for the active bucket.
 __global__ void scatter_kernel(int* src, int* dst, int* predicate, int* scan, int n, int global_offset) {
     int id = threadIdx.x + blockIdx.x * blockDim.x;
     if (id < n) {
-        // Only move the element if it belongs in the current digit bucket
-        // We still need the ORIGINAL predicate array here!
+        // Only threads flagged by the predicate write output this round.
+        // `scan[id]` is this element's rank among flagged elements before `id`.
         if (predicate[id] == 1) {
+            // `global_offset` is where this bucket starts in `dst`.
             dst[global_offset + scan[id]] = src[id];
         }
     }
@@ -32,6 +33,7 @@ void gpu_parallel_radix_sort(int* d_arr, int n) {
 
     int max_val = find_max_host_wrapper(d_arr, n);
 
+    // Ping-pong buffers: each digit pass reads from `src` and writes to `dst`.
     int* src = d_arr;
     int* dst = d_temp;
     int swaps = 0;
@@ -39,41 +41,43 @@ void gpu_parallel_radix_sort(int* d_arr, int n) {
     int threadsPerBlock = 256;
     int blocksPerGrid = (n + threadsPerBlock - 1) / threadsPerBlock;
 
-    // Outer Loop: Move through the digits
+    // Outer loop: run one digit pass at a time (ones, tens, hundreds, ...).
     for (int exp = 1; max_val / exp > 0; exp *= 10) {
+        // Running base index of the current bucket inside `dst`.
         int global_offset = 0;
         
-        // Inner Loop: Process each digit bucket
+        // Inner loop: process bucket 0..9 for the current digit pass.
         for (int digit = 0; digit < 10; digit++) {
             
-            // Step 1: Flag the elements
+            // Step 1: Build a 0/1 mask for the current digit bucket.
             evaluate_predicate_kernel<<<blocksPerGrid, threadsPerBlock>>>(src, d_predicate, n, exp, digit);
             CUDA_CHECK(cudaDeviceSynchronize());
 
-            // Step 2: Copy predicate to scan array (CRITICAL FIX)
-            // Because our manual scan is IN-PLACE, we must copy the 1s and 0s 
-            // into d_scan first so we don't destroy d_predicate.
+            // Step 2: Copy into a scratch array because the scan runs in place.
             CUDA_CHECK(cudaMemcpy(d_scan, d_predicate, n * sizeof(int), cudaMemcpyDeviceToDevice));
 
-            // Step 3: Completely Manual Prefix Sum (Exclusive Scan)
+            // Step 3: Exclusive scan converts mask -> in-bucket write indices.
             manual_exclusive_scan(d_scan, n);
             CUDA_CHECK(cudaDeviceSynchronize());
 
-            // Step 4: Scatter the flagged elements
+            // Step 4: Scatter flagged values into this bucket's destination range.
             scatter_kernel<<<blocksPerGrid, threadsPerBlock>>>(src, dst, d_predicate, d_scan, n, global_offset);
             CUDA_CHECK(cudaDeviceSynchronize());
 
-            // Update the global offset for the next digit bucket.
+            // Bucket size = last exclusive index + last predicate bit.
+            // This avoids a full reduction and keeps offset tracking simple.
             int last_scan, last_pred;
             CUDA_CHECK(cudaMemcpy(&last_scan, d_scan + n - 1, sizeof(int), cudaMemcpyDeviceToHost));
             CUDA_CHECK(cudaMemcpy(&last_pred, d_predicate + n - 1, sizeof(int), cudaMemcpyDeviceToHost));
             global_offset += (last_scan + last_pred);
         }
 
+        // Next digit pass reads from the freshly written buffer.
         int* tmp = src; src = dst; dst = tmp;
         swaps++;
     }
 
+    // If the last pass ended in the temporary buffer, copy back once.
     if (swaps % 2 != 0) {
         CUDA_CHECK(cudaMemcpy(d_arr, src, n * sizeof(int), cudaMemcpyDeviceToDevice));
     }
