@@ -1,0 +1,83 @@
+--- Loading Environment Modules ---
+--- Compiling Project ---
+rm -rf output
+mkdir -p output
+nvcc -O3 -std=c++14  -c main.cu -o output/main.o
+nvcc -O3 -std=c++14  -c radix_cpu_seq.cpp -o output/radix_cpu_seq.o
+nvcc -O3 -std=c++14  -c radix_gpu_seq.cu -o output/radix_gpu_seq.o
+nvcc -O3 -std=c++14  -c radix_gpu_par.cu -o output/radix_gpu_par.o
+nvcc -O3 -std=c++14  -c radix_gpu_lib.cu -o output/radix_gpu_lib.o
+nvcc -O3 -std=c++14  -c radix_gpu_opt.cu -o output/radix_gpu_opt.o
+radix_gpu_opt.cu(34): warning #550-D: variable "tile" was set but never used
+      __attribute__((shared)) int tile[256];
+                                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+radix_gpu_opt.cu(36): warning #177-D: variable "local_offsets" was declared but never referenced
+      __attribute__((shared)) int local_offsets[256];
+                                  ^
+
+nvcc -O3 -std=c++14  -o output/radix_sort_eval output/main.o output/radix_cpu_seq.o output/radix_gpu_seq.o output/radix_gpu_par.o output/radix_gpu_lib.o output/radix_gpu_opt.o
+--- Running Evaluation from Root ---
+Performing thorough GPU burn-in (100000 elements, 10 iterations)...
+Burn-in complete. Hardware is now at peak performance state.
+
+--- Radix Sort Scaling Study (Phase 3 - 3 Trials per Size) ---
+Log: Standard Output | Data: phase3_averaged_results.csv
+
+[10] Dataset Size: 2^10 (1024 elements)
+     - Averaged Opt:    0.796 ms |     1.29 M-elem/s
+
+[11] Dataset Size: 2^11 (2048 elements)
+     - Averaged Opt:    0.168 ms |    12.20 M-elem/s
+
+[12] Dataset Size: 2^12 (4096 elements)
+     - Averaged Opt:    0.171 ms |    24.00 M-elem/s
+
+[13] Dataset Size: 2^13 (8192 elements)
+     - Averaged Opt:    0.175 ms |    46.88 M-elem/s
+
+[14] Dataset Size: 2^14 (16384 elements)
+     - Averaged Opt:    0.175 ms |    93.57 M-elem/s
+
+[15] Dataset Size: 2^15 (32768 elements)
+     - Averaged Opt:    0.194 ms |   168.72 M-elem/s
+
+[16] Dataset Size: 2^16 (65536 elements)
+     - Averaged Opt:    0.201 ms |   325.98 M-elem/s
+
+[17] Dataset Size: 2^17 (131072 elements)
+     - Averaged Opt:    0.258 ms |   508.61 M-elem/s
+
+[18] Dataset Size: 2^18 (262144 elements)
+     - Averaged Opt:    0.625 ms |   419.21 M-elem/s
+
+[19] Dataset Size: 2^19 (524288 elements)
+     - Averaged Opt:    0.858 ms |   610.74 M-elem/s
+
+[20] Dataset Size: 2^20 (1048576 elements)
+     - Averaged Opt:    1.277 ms |   820.95 M-elem/s
+
+[21] Dataset Size: 2^21 (2097152 elements)
+     - Averaged Opt:    2.088 ms |  1004.25 M-elem/s
+
+[22] Dataset Size: 2^22 (4194304 elements)
+     - Averaged Opt:    3.649 ms |  1149.49 M-elem/s
+
+[23] Dataset Size: 2^23 (8388608 elements)
+     - Averaged Opt:    7.936 ms |  1057.08 M-elem/s
+
+[24] Dataset Size: 2^24 (16777216 elements)
+     - Averaged Opt:   17.228 ms |   973.81 M-elem/s
+
+[25] Dataset Size: 2^25 (33554432 elements)
+     - Averaged Opt:   33.333 ms |  1006.66 M-elem/s
+
+
+==========================================
+  FINAL STATUS: ALL CLEAR ✓
+  All 80 sorting tests passed successfully.
+==========================================
+Evaluation complete. Results saved to phase3_results.csv
+--- Evaluation Finished ---
