@@ -1,0 +1,14 @@
+#!/bin/bash
+#PBS -q normal
+#PBS -j oe
+#PBS -l select=1:ncpus=1:ngpus=1:mem=16G
+#PBS -l walltime=00:10:00
+#PBS -P 52001004
+#PBS -N BitSort_Stage3_Tiled
+
+cd $PBS_O_WORKDIR
+module load cuda
+
+nvcc -O3 -arch=sm_70 bitonic_tiled.cu -o bitonic_tiled
+
+./bitonic_tiled

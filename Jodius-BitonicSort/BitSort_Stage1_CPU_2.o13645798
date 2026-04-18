@@ -1,0 +1,4 @@
+k  | N | Time (ms) | Throughput (Elem/s) | Bandwidth (GB/s)
+20 | 1048576 | 1.37987e+06 | 759.912 | 0.00127665
+21 | 2097152 | 5.58725e+06 | 375.346 | 0.000693639
+=>> PBS: job killed: walltime 7204 exceeded limit 7200
