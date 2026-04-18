@@ -1,0 +1,14 @@
+Optimized Parallel QuickSort (Dynamic Parallelism + Thresholding)
+k    | N          | GPU Time      | Throughput   | Bandwidth
+------------------------------------------------------------
+2^10 | 1024       | 2.71667      ms | 3.77e+05     elem/s | 0.030 GB/s
+2^11 | 2048       | 2.690        ms | 7.61e+05     elem/s | 0.067 GB/s
+2^12 | 4096       | 4.189        ms | 9.78e+05     elem/s | 0.094 GB/s
+2^13 | 8192       | 9.278        ms | 8.83e+05     elem/s | 0.092 GB/s
+2^14 | 16384      | 14.859       ms | 1.10e+06     elem/s | 0.123 GB/s
+2^15 | 32768      | 17.078       ms | 1.92e+06     elem/s | 0.230 GB/s
+2^16 | 65536      | 49.663       ms | 1.32e+06     elem/s | 0.169 GB/s
+2^17 | 131072     | 96.058       ms | 1.36e+06     elem/s | 0.186 GB/s
+2^18 | 262144     | 101.852      ms | 2.57e+06     elem/s | 0.371 GB/s
+2^19 | 524288     | 301.410      ms | 1.74e+06     elem/s | 0.264 GB/s
+2^20 | 1048576    | 411.230      ms | 2.55e+06     elem/s | 0.408 GB/s
