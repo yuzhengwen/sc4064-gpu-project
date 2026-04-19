@@ -1,6 +1,8 @@
 #include "utils.h"
 #include <vector>
 
+// Reference CPU LSD radix sort used as a correctness and timing baseline.
+
 void cpu_sequential_radix_sort(int* h_arr, int n) {
     int max_val = find_max_host(h_arr, n);
     std::vector<int> temp(n);

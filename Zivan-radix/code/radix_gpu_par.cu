@@ -1,5 +1,7 @@
 #include "utils.h"
 
+// Baseline parallel radix sort: per-digit predicate + scan + scatter pipeline.
+
 // Kernel 1: Build a predicate mask for one bucket in one digit pass.
 // `predicate[id] == 1` means this value belongs to the active bucket.
 __global__ void evaluate_predicate_kernel(int* src, int* predicate, int n, int exp, int digit) {

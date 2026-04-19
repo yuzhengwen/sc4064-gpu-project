@@ -1,5 +1,7 @@
 #include "utils.h"
 
+// Phase-2 optimized radix variant: block-local histograms plus scanned offsets.
+
 // =========================================================================
 // --- RADIX SORT PHASE 2 KERNELS (BLOCK HISTOGRAM + REORDER) ---
 // =========================================================================
@@ -47,7 +49,8 @@ __global__ void reorder_kernel_p2(int* src, int* dst, int* scanned_hists, int n,
     __syncthreads(); 
 
     if (id < n) {
-        // Count same-bucket predecessors inside this block to get local rank.
+        // Local rank is computed by counting prior threads in the same bucket.
+        // This keeps logic simple, though it is O(blockDim) per thread.
         int local_rank = 0;
         for (int i = 0; i < threadIdx.x; i++) {
             if (thread_digits[i] == my_digit) {

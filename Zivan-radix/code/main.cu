@@ -7,6 +7,8 @@
 #include <fstream> // For file output
 #include "utils.h"
 
+// Benchmark driver for comparing CPU and multiple GPU radix-sort variants.
+
 // Stores the averaged runtime for each implementation at one input size.
 struct Result {
     long long size;
@@ -94,6 +96,7 @@ void thorough_gpu_warmup(int n_warmup = 100000, int iterations = 10) {
 
 __global__ void force_context_init() {
     __shared__ int dummy[1024];
+    // Trivial warm-up kernel to force CUDA context initialization before timing.
     if (threadIdx.x < 1024) dummy[threadIdx.x] = threadIdx.x;
 }
 
@@ -109,14 +112,18 @@ int main() {
     // 1. Hardware burn-in.
     thorough_gpu_warmup();
 
-    // 2. Open CSV with updated headers for comparison.
-    std::ofstream csvFile("phase4_results.csv");
+    // 2. Write CSV to the visualization output folder.
+    const char* csvPath = "visualization/phase4_results.csv";
+
+    std::ofstream csvFile(csvPath);
     if (csvFile.is_open()) {
         csvFile << "Size,CPU_ms,GPU_Seq_ms,GPU_Naive_ms,GPU_P2_Opt_ms,GPU_P3_Opt_ms,GPU_Thrust_ms\n";
+    } else {
+        printf("WARNING: Unable to open CSV output file at %s\n", csvPath);
     }
 
     printf("--- Radix Sort Scaling Study (Phase 4 - Unified Comparison) ---\n");
-    printf("Log: Standard Output | Data: phase4_results.csv\n\n");
+    printf("Log: Standard Output | Data: %s\n\n", csvPath);
 
     for (int i = 10; i <= 25; i++) {
         long long SIZE = 1LL << i;
@@ -151,6 +158,7 @@ int main() {
             }
 
             // [TEST 2: GPU Seq]
+            // Measures the intentionally non-parallel GPU baseline.
             CUDA_CHECK(cudaMemcpy(d_test, d_original, SIZE * sizeof(int), cudaMemcpyDeviceToDevice));
             cudaEventRecord(start);
             gpu_sequential_radix_sort(d_test, (int)SIZE);
@@ -160,6 +168,7 @@ int main() {
             if (t == 0) total_errors += verify_sorting(d_test, (int)SIZE, "GPU Seq", i);
 
             // [TEST 3: GPU Naive]
+            // Predicate+scan+scatter baseline parallel implementation.
             CUDA_CHECK(cudaMemcpy(d_test, d_original, SIZE * sizeof(int), cudaMemcpyDeviceToDevice));
             cudaEventRecord(start);
             gpu_parallel_radix_sort(d_test, (int)SIZE);
@@ -169,6 +178,7 @@ int main() {
             if (t == 0) total_errors += verify_sorting(d_test, (int)SIZE, "GPU Naive", i);
 
             // [TEST 4: GPU P2 (Shared/Scattered)]
+            // Optimization phase 2: block histogram and scanned block offsets.
             CUDA_CHECK(cudaMemcpy(d_test, d_original, SIZE * sizeof(int), cudaMemcpyDeviceToDevice));
             cudaEventRecord(start);
             gpu_parallel_radix_sort_opt_p2(d_test, (int)SIZE);
@@ -178,6 +188,7 @@ int main() {
             if (t == 0) total_errors += verify_sorting(d_test, (int)SIZE, "GPU P2 Opt", i);
 
             // [TEST 5: GPU P3 (Coalesced)]
+            // Optimization phase 3: tile shuffle path for more coalesced writes.
             CUDA_CHECK(cudaMemcpy(d_test, d_original, SIZE * sizeof(int), cudaMemcpyDeviceToDevice));
             cudaEventRecord(start);
             gpu_parallel_radix_sort_opt_p3(d_test, (int)SIZE);

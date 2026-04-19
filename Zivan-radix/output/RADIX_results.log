@@ -1,0 +1,90 @@
+--- Loading Environment Modules ---
+--- Compiling Project ---
+rm -rf /home/users/ntu/zsoh010/output
+mkdir -p /home/users/ntu/zsoh010/output
+nvcc -O3 -std=c++14  -c /home/users/ntu/zsoh010/code/main.cu -o /home/users/ntu/zsoh010/output/main.o
+/home/users/ntu/zsoh010/code/main.cu(98): warning #550-D: variable "dummy" was set but never used
+      __attribute__((shared)) int dummy[1024];
+                                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+nvcc -O3 -std=c++14  -c /home/users/ntu/zsoh010/code/scan.cu -o /home/users/ntu/zsoh010/output/scan.o
+nvcc -O3 -std=c++14  -c /home/users/ntu/zsoh010/code/radix_cpu_seq.cpp -o /home/users/ntu/zsoh010/output/radix_cpu_seq.o
+nvcc -O3 -std=c++14  -c /home/users/ntu/zsoh010/code/radix_gpu_seq.cu -o /home/users/ntu/zsoh010/output/radix_gpu_seq.o
+nvcc -O3 -std=c++14  -c /home/users/ntu/zsoh010/code/radix_gpu_par.cu -o /home/users/ntu/zsoh010/output/radix_gpu_par.o
+nvcc -O3 -std=c++14  -c /home/users/ntu/zsoh010/code/radix_gpu_lib.cu -o /home/users/ntu/zsoh010/output/radix_gpu_lib.o
+nvcc -O3 -std=c++14  -c /home/users/ntu/zsoh010/code/radix_gpu_opt_p2.cu -o /home/users/ntu/zsoh010/output/radix_gpu_opt_p2.o
+nvcc -O3 -std=c++14  -c /home/users/ntu/zsoh010/code/radix_gpu_opt_p3.cu -o /home/users/ntu/zsoh010/output/radix_gpu_opt_p3.o
+/home/users/ntu/zsoh010/code/radix_gpu_opt_p3.cu(32): warning #550-D: variable "tile" was set but never used
+      __attribute__((shared)) int tile[256];
+                                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/users/ntu/zsoh010/code/radix_gpu_opt_p3.cu(35): warning #177-D: variable "local_offsets" was declared but never referenced
+      __attribute__((shared)) int local_offsets[256];
+                                  ^
+
+nvcc -O3 -std=c++14  -o /home/users/ntu/zsoh010/output/radix_sort_eval /home/users/ntu/zsoh010/output/main.o /home/users/ntu/zsoh010/output/scan.o /home/users/ntu/zsoh010/output/radix_cpu_seq.o /home/users/ntu/zsoh010/output/radix_gpu_seq.o /home/users/ntu/zsoh010/output/radix_gpu_par.o /home/users/ntu/zsoh010/output/radix_gpu_lib.o /home/users/ntu/zsoh010/output/radix_gpu_opt_p2.o /home/users/ntu/zsoh010/output/radix_gpu_opt_p3.o
+--- Running Evaluation ---
+Performing thorough GPU burn-in (100000 elements, 10 iterations)...
+Burn-in complete. Hardware is now at peak performance state.
+
+--- Radix Sort Scaling Study (Phase 4 - Unified Comparison) ---
+Log: Standard Output | Data: visualization/phase4_results.csv
+
+[10] Dataset Size: 2^10 (1024 elements)
+     - P2 Opt:    0.971 ms | P3 Opt:    6.696 ms
+
+[11] Dataset Size: 2^11 (2048 elements)
+     - P2 Opt:    0.183 ms | P3 Opt:    0.182 ms
+
+[12] Dataset Size: 2^12 (4096 elements)
+     - P2 Opt:    0.181 ms | P3 Opt:    0.183 ms
+
+[13] Dataset Size: 2^13 (8192 elements)
+     - P2 Opt:    0.190 ms | P3 Opt:    0.187 ms
+
+[14] Dataset Size: 2^14 (16384 elements)
+     - P2 Opt:    0.195 ms | P3 Opt:    0.195 ms
+
+[15] Dataset Size: 2^15 (32768 elements)
+     - P2 Opt:    0.253 ms | P3 Opt:    0.255 ms
+
+[16] Dataset Size: 2^16 (65536 elements)
+     - P2 Opt:    0.283 ms | P3 Opt:    0.285 ms
+
+[17] Dataset Size: 2^17 (131072 elements)
+     - P2 Opt:    0.347 ms | P3 Opt:    0.347 ms
+
+[18] Dataset Size: 2^18 (262144 elements)
+     - P2 Opt:    0.660 ms | P3 Opt:    0.660 ms
+
+[19] Dataset Size: 2^19 (524288 elements)
+     - P2 Opt:    1.047 ms | P3 Opt:    1.064 ms
+
+[20] Dataset Size: 2^20 (1048576 elements)
+     - P2 Opt:    1.485 ms | P3 Opt:    1.498 ms
+
+[21] Dataset Size: 2^21 (2097152 elements)
+     - P2 Opt:    2.364 ms | P3 Opt:    2.400 ms
+
+[22] Dataset Size: 2^22 (4194304 elements)
+     - P2 Opt:    4.086 ms | P3 Opt:    4.156 ms
+
+[23] Dataset Size: 2^23 (8388608 elements)
+     - P2 Opt:   10.400 ms | P3 Opt:   10.332 ms
+
+[24] Dataset Size: 2^24 (16777216 elements)
+     - P2 Opt:   20.461 ms | P3 Opt:   20.034 ms
+
+[25] Dataset Size: 2^25 (33554432 elements)
+     - P2 Opt:   39.732 ms | P3 Opt:   39.574 ms
+
+
+==========================================
+  FINAL STATUS: ALL CLEAR ✓
+==========================================
+--- Moving CSV outputs to visualization/ ---
+--- Evaluation Finished ---

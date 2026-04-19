@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+// Shared declarations/utilities for radix sort implementations and benchmarks.
 #pragma once
 #include <iostream>
 #include <cuda_runtime.h>
@@ -38,7 +39,7 @@ void print_sample(const char* label, int* arr, int n, int count = 20, bool is_de
 void verify_and_print(int* d_arr, int n);
 void manual_exclusive_scan(int* d_arr, int n);
 
-// Sorting implementations
+// Sorting implementations used in the benchmark harness.
 void cpu_sequential_radix_sort(int* h_arr, int n);
 void gpu_sequential_radix_sort(int* d_arr, int n);
 void gpu_parallel_radix_sort(int* d_arr, int n);

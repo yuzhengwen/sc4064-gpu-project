@@ -1,5 +1,8 @@
 #include "utils.h"
 
+// Device-side scan utilities used by the radix pipelines.
+// This implementation builds an inclusive scan first, then derives exclusive scan.
+
 __global__ void block_inclusive_scan_kernel(int* data, int* block_sums, int n) {
     extern __shared__ int temp[];
     int id = threadIdx.x + blockIdx.x * blockDim.x;
@@ -27,11 +30,13 @@ __global__ void block_inclusive_scan_kernel(int* data, int* block_sums, int n) {
 
 __global__ void add_block_sums_kernel(int* data, int* block_sums, int n) {
     int id = threadIdx.x + blockIdx.x * blockDim.x;
+    // Every block (except block 0) adds the cumulative sum of all prior blocks.
     if (blockIdx.x > 0 && id < n) data[id] += block_sums[blockIdx.x - 1];
 }
 
 __global__ void inclusive_to_exclusive_kernel(int* data, int* exclusive_data, int n) {
     int id = threadIdx.x + blockIdx.x * blockDim.x;
+    // Exclusive scan is a one-position right shift with 0 at index 0.
     if (id < n) exclusive_data[id] = (id == 0) ? 0 : data[id - 1];
 }
 
@@ -58,7 +63,7 @@ void manual_inclusive_scan(int* d_arr, int n) {
 
 void manual_exclusive_scan(int* d_arr, int n) {
     if (n <= 0) return;
-    // Convert inclusive scan output into an exclusive scan in a separate buffer.
+    // Convert inclusive scan output into an exclusive scan via a temporary buffer.
     manual_inclusive_scan(d_arr, n);
 
     int* d_temp_exclusive;

@@ -1,5 +1,7 @@
 #include "utils.h"
 
+// GPU single-thread radix pass baseline (correctness-oriented, not performance-oriented).
+
 __global__ void sequential_radix_kernel(int* data, int* temp, int n, int exp) {
     int count[10] = {0};
 
@@ -13,6 +15,7 @@ __global__ void sequential_radix_kernel(int* data, int* temp, int n, int exp) {
 
     for (int i = 0; i < n; i++) {
         int digit = (data[i] / exp) % 10;
+        // `prefix[digit]` tracks the next free write index in this bucket.
         temp[prefix[digit]++] = data[i];
     }
 }

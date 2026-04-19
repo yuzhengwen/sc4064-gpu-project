@@ -3,6 +3,8 @@
 #include <thrust/sort.h>
 #include <thrust/execution_policy.h>
 
+// Library-backed GPU sort path using Thrust as an optimized reference implementation.
+
 void gpu_library_radix_sort(int* d_arr, int n) {
     // Wrap the raw device pointer so Thrust can treat it as a device range.
     thrust::device_ptr<int> dev_ptr(d_arr);

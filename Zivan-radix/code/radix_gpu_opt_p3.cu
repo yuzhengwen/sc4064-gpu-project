@@ -1,5 +1,7 @@
 #include "utils.h"
 
+// Phase-3 optimized radix variant: tile-level regrouping for more coalesced writes.
+
 // =========================================================================
 // --- RADIX SORT PHASE 3 KERNELS (TILE SHUFFLE FOR COALESCED WRITES) ---
 // =========================================================================
@@ -67,7 +69,7 @@ __global__ void reorder_kernel_coalesced_p3(int* src, int* dst, int* scanned_his
 
     if (id < n) {
         int local_rank = 0;
-        // Kept for possible warp-level rank optimization; not consumed below.
+        // Kept for potential warp-level rank optimization; currently unused.
         unsigned int mask = __ballot_sync(0xFFFFFFFF, true); 
         
         for (int i = 0; i < threadIdx.x; i++) {
@@ -81,7 +83,7 @@ __global__ void reorder_kernel_coalesced_p3(int* src, int* dst, int* scanned_his
     __syncthreads(); 
 
     if (id < n) {
-        // Read back in thread order; tile layout determines which bucket this thread writes.
+        // Read in thread order after tile shuffle; data order now encodes bucket grouping.
         int final_val = shuffled_tile[threadIdx.x];
         int final_digit = (final_val < 0) ? 0 : (final_val / exp) % 10;
         
