@@ -8,12 +8,12 @@ Directly porting sequential algorithms to GPU architectures often causes severe 
 
 ## Algorithms
 
-| Folder | Algorithm | Key Insight | Peak Speedup vs CPU |
+| Folder | Algorithm | Key Insight | Best Custom Speedup vs CPU |
 | --- | --- | --- | --- |
-| [Jodius-BitonicSort](Jodius-BitonicSort/bitonicsort.md) | Bitonic Sort | Branchless sorting network saturates A100 memory bandwidth wall (~1.3 ms at N=2²⁰) | ~1,000,000× CPU (Thrust) |
-| [Jodius-QuickSort](Jodius-QuickSort/quicksort.md) | QuickSort | Thread divergence from dynamic pivots serializes warps; GPU _slower_ than CPU without Thrust | 0.009× (Iterative GPU), 22× (Dynamic Parallelism) |
-| [Zivan-radix](Zivan-radix/README.md) | Radix Sort | Non-comparative data-parallel design overcomes bottlenecks; shared memory histograms key step | 19.9× (custom P3), 334× (Thrust) |
-| [Zw-Merge](Zw-Merge/README.md) | Merge Sort | Naive GPU collapses to 1 thread at final pass; parallel co-rank (BSearch) resolves bottleneck | 122× (BSearch), 860× (Thrust) |
+| [Jodius-BitonicSort](Jodius-BitonicSort/bitonicsort.md) | Bitonic Sort | Branchless sorting network saturates A100 memory bandwidth wall (~1.3 ms at N=2²⁰) | ~1,000,000× (Tiled Shared Mem) |
+| [Jodius-QuickSort](Jodius-QuickSort/quicksort.md) | QuickSort | Thread divergence from dynamic pivots serializes warps; GPU _slower_ than CPU without Thrust | 0.18× (Dynamic Parallelism) |
+| [Zivan-radix](Zivan-radix/README.md) | Radix Sort | Non-comparative data-parallel design overcomes bottlenecks; shared memory histograms key step | 19.9× (P3 Coalesced) |
+| [Zw-Merge](Zw-Merge/README.md) | Merge Sort | Naive GPU collapses to 1 thread at final pass; parallel co-rank (BSearch) resolves bottleneck | 122× (BSearch) |
 
 ## Key Findings
 
