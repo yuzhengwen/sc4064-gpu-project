@@ -4,9 +4,6 @@
 #include <cstdlib>
 #include <ctime>
 
-/* ------------------------------------------------------------------ */
-/*  Timing helper                                                       */
-/* ------------------------------------------------------------------ */
 static double wall_ms()
 {
     struct timespec ts;
@@ -14,9 +11,6 @@ static double wall_ms()
     return ts.tv_sec * 1e3 + ts.tv_nsec * 1e-6;
 }
 
-/* ================================================================== */
-/*  std::sort wrapper                                                   */
-/* ================================================================== */
 float run_std_sort(int *arr, int n)
 {
     double t0 = wall_ms();
@@ -24,12 +18,7 @@ float run_std_sort(int *arr, int n)
     return (float)(wall_ms() - t0);
 }
 
-/* ================================================================== */
-/*  Recursive merge sort — pre-allocated temp buffer                   */
-/*                                                                     */
-/*  Using a single temp buffer (no malloc/free per merge) avoids the   */
-/*  heap overhead that was present in the previous implementation.     */
-/* ================================================================== */
+//  Recursive merge sort — pre-allocated temp buffer (no malloc/free per merge)
 static void merge_step(int *arr, int *tmp, int left, int mid, int right)
 {
     /* merge arr[left..mid) and arr[mid..right) via tmp */

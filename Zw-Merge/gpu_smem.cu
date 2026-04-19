@@ -5,9 +5,6 @@
 #include <algorithm>
 using std::min;
 
-/* ================================================================== */
-/*  Configuration                                                       */
-/* ================================================================== */
 #define TILE_SIZE 512          /* elements per smem tile (power of 2) */
 #define SMEM_THREADS (TILE_SIZE / 2)  /* each thread loads 2 elements */
 
@@ -92,9 +89,6 @@ __global__ void smem_global_merge_k(const int *__restrict__ src,
     while (j < right) dst[k++] = src[j++];
 }
 
-/* ================================================================== */
-/*  Host launcher                                                       */
-/* ================================================================== */
 float run_gpu_smem(const int *h_src, int *h_dst, int n)
 {
     const int THREADS = 256;

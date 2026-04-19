@@ -4,10 +4,8 @@
 #include <algorithm>
 using std::min;
 
-/* ================================================================== */
-/*  Kernel: one thread merges one pair of sorted runs                  */
-/*  Each thread owns the full sequential merge of its segment.         */
-/* ================================================================== */
+// Kernel: one thread merges one pair of sorted runs                  
+// Each thread owns the full sequential merge of its segment.        
 __global__ void naive_merge_k(const int *__restrict__ src,
                                int       *__restrict__ dst,
                                long long n, long long width)
@@ -32,9 +30,6 @@ __global__ void naive_merge_k(const int *__restrict__ src,
     while (j < right) dst[k++] = src[j++];
 }
 
-/* ================================================================== */
-/*  Host launcher                                                       */
-/* ================================================================== */
 float run_gpu_naive(const int *h_src, int *h_dst, int n)
 {
     const int THREADS = 256;

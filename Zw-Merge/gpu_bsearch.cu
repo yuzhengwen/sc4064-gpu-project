@@ -124,9 +124,6 @@ __global__ void bsearch_merge_k(const int *__restrict__ src,
         dst[gid] = src[mid_p + j];
 }
 
-/* ================================================================== */
-/*  Host launcher                                                       */
-/* ================================================================== */
 float run_gpu_bsearch(const int *h_src, int *h_dst, int n)
 {
     const int THREADS = 256;

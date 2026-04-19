@@ -11,12 +11,6 @@
  *  GPU  6. thrust::sort         (library baseline)
  *
  * Sizes: 2^10, 2^15, 2^20, 2^25
- *
- * Output format
- * -------------
- *  Per size: per-pass timing table for each GPU variant,
- *            followed by a correctness check.
- *  End:      summary table (time, throughput, bandwidth, speedup).
  */
 
 #include <cstdio>
@@ -31,9 +25,6 @@
 #include "gpu_bsearch.h"
 #include "gpu_thrust.h"
 
-/* ------------------------------------------------------------------ */
-/*  Verification                                                        */
-/* ------------------------------------------------------------------ */
 static bool verify(const int *ref, const int *result, int n)
 {
     for (int i = 0; i < n; i++)
@@ -41,17 +32,11 @@ static bool verify(const int *ref, const int *result, int n)
     return true;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Separator helpers                                                   */
-/* ------------------------------------------------------------------ */
 static void sep(char c = '-', int w = 78) {
     for (int i = 0; i < w; i++) putchar(c);
     putchar('\n');
 }
 
-/* ================================================================== */
-/*  Result record for the summary table                                */
-/* ================================================================== */
 struct Record {
     const char *label;
     float times[4];   /* one per size index */
@@ -96,9 +81,6 @@ int main()
     printf("  Sizes: 2^10, 2^15, 2^20, 2^25\n");
     sep('=');
 
-    /* ==================================================================
-     *  Main loop over array sizes
-     * ================================================================== */
     for (int si = 0; si < N_SIZES; si++) {
         int    n     = SIZES[si];
         size_t bytes = (size_t)n * sizeof(int);

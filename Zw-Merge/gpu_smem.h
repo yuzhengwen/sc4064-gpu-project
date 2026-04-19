@@ -6,7 +6,6 @@
  * Phase 1 — each block loads TILE_SIZE elements into shared memory and
  *            sorts them entirely on-chip (bottom-up merge in smem).
  *            This eliminates the first log2(TILE_SIZE) global-memory passes.
- *
  * Phase 2 — iterative global-memory merge starting at width = TILE_SIZE,
  *            identical to the naive kernel.
  *
